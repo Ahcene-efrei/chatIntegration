@@ -1,6 +1,5 @@
 package test;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -16,7 +15,7 @@ public class Main {
 
 		//ApplicationContext ctx = new ClassPathXmlApplicationContext("routing.xml");
 
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("aggragate.xml");
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("message.xml");
 
 		/*
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("javaScriptService.xml");
