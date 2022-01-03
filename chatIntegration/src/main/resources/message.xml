@@ -10,41 +10,48 @@
            http://www.springframework.org/schema/integration/file
            http://www.springframework.org/schema/integration/file/spring-integration-file-5.1.xsd">
 
-    <int-file:inbound-channel-adapter 
-		channel="channelEntree" 
-    	directory="dataIn"
-    	filename-pattern="messages.json">
-    		<int:poller id="poller" fixed-delay="1000" />
+    <int-file:inbound-channel-adapter
+            channel="jsonIn"
+            directory="dataIn"
+            filename-pattern="messages.json">
+        <int:poller id="poller" fixed-delay="1000"/>
     </int-file:inbound-channel-adapter>
-    
-    <int:json-to-object-transformer input-channel="channelEntree" output-channel="messageObject" type="test.Message"></int:json-to-object-transformer>
 
-    <int:channel id="messageObject"></int:channel>
+    <int:channel id="messageObject"/>
 
-    <int:logging-channel-adapter id="messageObject" level="INFO"/>
+    <int:json-to-object-transformer input-channel="jsonIn" output-channel="messageObject"
+                                    type="not.censured.chat.Message"/>
+
+    <int:logging-channel-adapter channel="messageObject" level="ERROR"/>
 
     <int:recipient-list-router id="customRouter" input-channel="messageObject">
-  		<int:recipient channel="messageCleanService"/>
-  		<int:recipient channel="aggregateAuthor"/>
-	</int:recipient-list-router>
+        <int:recipient channel="messageCleaner"/>
+<!--        <int:recipient channel="aggregateAuthor"/>-->
+    </int:recipient-list-router>
 
-    <int:service-activator input-channel="messageCleanService" output-channel="cleanMessageObject" ref="serviceID" method="cleanMessage"/>
-    <bean id="serviceID" class="test.MessageService"/>
-    <int:logging-channel-adapter id="cleanMessageObject" level="INFO"/>
-    <int:channel id="cleanMessageObject"></int:channel>
+    <int:channel id="cleanedMessageObject"/>
 
-    <int-file:outbound-channel-adapter channel="cleanMessageObject" id="filesOut" directory="dataOut2"/>
+    <int:logging-channel-adapter channel="messageCleaner" level="ERROR"/>
 
-    <int:channel id="aggregateAuthor"></int:channel>
+    <int:service-activator input-channel="messageCleaner" output-channel="cleanedMessageObject"
+                           method="cleanMessage">
+        <bean class="not.censured.chat.MessageService"/>
+    </int:service-activator>
 
-    <int:aggregator id="myAggregator"
-                    input-channel="aggregateAuthor"
-                    output-channel="outputChannel"
-                    correlation-strategy-expression="payload.author">
-    </int:aggregator>
+    <int:logging-channel-adapter channel="cleanedMessageObject" level="ERROR"/>
 
-    <int:channel id="outputChannel"></int:channel>
-    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>
+<!--    <int-file:outbound-channel-adapter channel="cleanedMessageObject" id="filesOut" directory="dataOut2"/>-->
+
+<!--    <int:channel id="aggregateAuthor"/>-->
+
+<!--    <int:aggregator id="myAggregator"-->
+<!--                    input-channel="aggregateAuthor"-->
+<!--                    output-channel="outputChannel"-->
+<!--                    correlation-strategy-expression="payload.author">-->
+<!--    </int:aggregator>-->
+
+<!--    <int:channel id="outputChannel"/>-->
+<!--    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>-->
 
 
 </beans>
