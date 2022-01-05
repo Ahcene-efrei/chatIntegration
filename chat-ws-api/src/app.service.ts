@@ -25,6 +25,9 @@ export class AppService {
   }
 
   writeMessageToFile(message: Message, filename = 'clear') {
-    fs.writeFileSync(`../chatIntegration/dataIn/${filename}.json`, JSON.stringify(message));
+    fs.writeFileSync(
+      `../not-censured-chat/dataIn/${filename}.json`,
+      JSON.stringify(message),
+    );
   }
 }
