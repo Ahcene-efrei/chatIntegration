@@ -10,43 +10,55 @@
            http://www.springframework.org/schema/integration/file
            http://www.springframework.org/schema/integration/file/spring-integration-file-5.1.xsd">
 
+    <int:channel id="dataInChannel"/>
+
     <int-file:inbound-channel-adapter
-            channel="channelEntree"
+            channel="dataInChannel"
             directory="dataIn"
-            filename-pattern="messages.json">
-        <int:poller id="poller" fixed-delay="1000" />
+            filename-pattern="message.json">
+        <int:poller id="poller" fixed-delay="1000"/>
     </int-file:inbound-channel-adapter>
 
-    <int:channel id="channelEntree"></int:channel>
+    <int:channel id="dataInObject"/>
 
-    <int:json-to-object-transformer input-channel="channelEntree" output-channel="messageObject" type="test.Message"></int:json-to-object-transformer>
+    <int:json-to-object-transformer input-channel="dataInChannel"
+                                    output-channel="dataInObject"
+                                    type="fr.efrei.notcensuredchat.Message"/>
 
-    <int:channel id="messageObject"></int:channel>
+<!--    <int:logging-channel-adapter channel="dataInObject"/>-->
 
-    <int:logging-channel-adapter id="messageObject" level="INFO"/>
-
-    <int:recipient-list-router id="customRouter" input-channel="messageObject">
-        <int:recipient channel="messageCleanService"/>
-        <int:recipient channel="aggregateAuthor"/>
+    <int:recipient-list-router input-channel="dataInObject">
+        <int:recipient channel="censureChannel"/>
+        <!--        <int:recipient channel="aggregateAuthor"/>-->
     </int:recipient-list-router>
 
-    <int:service-activator input-channel="messageCleanService" output-channel="cleanMessageObject" ref="serviceID" method="cleanMessage"/>
-    <bean id="serviceID" class="test.MessageService"/>
-    <int:logging-channel-adapter id="cleanMessageObject" level="INFO"/>
-    <int:channel id="cleanMessageObject"></int:channel>
+    <bean id="censureService" class="fr.efrei.notcensuredchat.CensureService"/>
 
-    <int-file:outbound-channel-adapter channel="cleanMessageObject" id="filesOut" directory="dataOut2"/>
+    <int:channel id="dataOutObject"/>
 
-    <int:channel id="aggregateAuthor"></int:channel>
+    <int:service-activator input-channel="censureChannel"
+                           output-channel="dataOutObject"
+                           ref="censureService"
+                           method="censureMessage"/>
 
-    <int:aggregator id="myAggregator"
-                    input-channel="aggregateAuthor"
-                    output-channel="outputChannel"
-                    correlation-strategy-expression="payload.author">
-    </int:aggregator>
+<!--    <int:logging-channel-adapter channel="dataOutObject" level="INFO"/>-->
 
-    <int:channel id="outputChannel"></int:channel>
-    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>
+    <int:channel id="dataOutChannel"/>
+
+    <int:object-to-json-transformer input-channel="dataOutObject" output-channel="dataOutChannel"/>
+
+    <int-file:outbound-channel-adapter id="filesOut" channel="dataOutChannel" directory="dataOut"/>
+
+    <!--    <int:channel id="aggregateAuthor"/>-->
+
+    <!--    <int:aggregator id="myAggregator"-->
+    <!--                    input-channel="aggregateAuthor"-->
+    <!--                    output-channel="outputChannel"-->
+    <!--                    correlation-strategy-expression="payload.author">-->
+    <!--    </int:aggregator>-->
+
+    <!--    <int:channel id="outputChannel"></int:channel>-->
+    <!--    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>-->
 
 
 </beans>

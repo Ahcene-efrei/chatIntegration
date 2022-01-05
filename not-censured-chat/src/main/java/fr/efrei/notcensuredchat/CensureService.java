@@ -1,7 +1,7 @@
 package fr.efrei.notcensuredchat;
 
-public class MessageService {
-    public Message cleanMessage(Message message) {
+public class CensureService {
+    public Message censureMessage(Message message) {
         message.censureMessage();
         return message;
     }

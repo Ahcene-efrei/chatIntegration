@@ -1,5 +1,9 @@
 package fr.efrei.notcensuredchat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,12 +15,37 @@ public class Message {
 
     @Override
     public String toString() {
-        return "{ author='" + author + "', content='" + content + "', date='" + date + "'}";
+        return "ESAIAAAAAAAAAAAAAAAAAAAAAAAAAAS { author='" + author + "', content='" + content + "', date='" + date + "'}";
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        return formatter.format(date);
     }
 
     public void censureMessage() {
         ArrayList<String> badWords = new ArrayList<>(List.of("fuck"));
-        
+
         boolean found = false;
 
         for (String badWord : badWords) {
