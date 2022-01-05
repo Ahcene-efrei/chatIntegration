@@ -19,8 +19,8 @@ export class AppGateway
   constructor(private readonly appService: AppService) {}
 
   @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, message: Message): void {
-    const cleanedMessage = this.appService.sendMessage(message);
+  async handleMessage(client: Socket, message: Message): Promise<void> {
+    const cleanedMessage = await this.appService.sendMessage(message);
     this.server.emit('msgToClient', cleanedMessage);
   }
 

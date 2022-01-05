@@ -2,32 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { Message } from './message';
 import * as fs from 'fs';
 
-const badWords = ['fuck'];
+const basePath = '../not-censured-chat';
+const inFilePath = 'dataIn/message.json';
+const outFilePath = 'dataOut/message.json';
 
 @Injectable()
 export class AppService {
-  sendMessage(message: Message): Message {
+  async sendMessage(message: Message): Promise<Message> {
     this.writeMessageToFile(message);
-    let filteredContent = '';
-    for (const word of message.content.split(' ')) {
-      for (const badWord of badWords) {
-        filteredContent += ' ';
-        if (word.includes(badWord)) {
-          filteredContent += '*'.repeat(word.length);
-        } else {
-          filteredContent += word;
-        }
-      }
-    }
-    message.content = filteredContent;
-    this.writeMessageToFile(message, 'filtered');
-    return message;
+    await new Promise((_) => setTimeout(_, 500));
+    return this.readMessageFromFile();
   }
 
-  writeMessageToFile(message: Message, filename = 'clear') {
-    fs.writeFileSync(
-      `../not-censured-chat/dataIn/${filename}.json`,
-      JSON.stringify(message),
-    );
+  writeMessageToFile(message: Message) {
+    fs.writeFileSync(`${basePath}/${inFilePath}`, JSON.stringify(message));
+  }
+
+  readMessageFromFile(): Message {
+    const message = fs.readFileSync(`${basePath}/${outFilePath}`);
+    return JSON.parse(message.toString());
   }
 }
