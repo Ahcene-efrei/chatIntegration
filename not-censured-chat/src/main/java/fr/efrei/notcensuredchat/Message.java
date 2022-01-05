@@ -5,8 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class Message {
-    private final ArrayList<String> badWords = new ArrayList<>(List.of("fuck"));
-
     private String author;
     private String content;
     private Date date;
@@ -17,6 +15,8 @@ public class Message {
     }
 
     public void censureMessage() {
+        ArrayList<String> badWords = new ArrayList<>(List.of("fuck"));
+        
         boolean found = false;
 
         for (String badWord : badWords) {
