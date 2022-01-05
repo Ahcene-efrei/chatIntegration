@@ -15,7 +15,9 @@ export class AppService {
   }
 
   writeMessageToFile(message: Message) {
-    fs.writeFileSync(`${basePath}/${inFilePath}`, JSON.stringify(message));
+    fs.writeFileSync(`${basePath}/${inFilePath}`, JSON.stringify(message), {
+      flag: 'w',
+    });
   }
 
   readMessageFromFile(): Message {

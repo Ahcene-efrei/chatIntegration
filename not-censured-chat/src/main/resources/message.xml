@@ -29,7 +29,7 @@
 
     <int:recipient-list-router input-channel="dataInObject">
         <int:recipient channel="censureChannel"/>
-        <!--        <int:recipient channel="aggregateAuthor"/>-->
+<!--        <int:recipient channel="aggregateAuthor"/>-->
     </int:recipient-list-router>
 
     <bean id="censureService" class="fr.efrei.notcensuredchat.CensureService"/>
@@ -41,15 +41,20 @@
                            ref="censureService"
                            method="censureMessage"/>
 
-<!--    <int:logging-channel-adapter channel="dataOutObject" level="INFO"/>-->
+    <!--    <int:logging-channel-adapter channel="dataOutObject" level="INFO"/>-->
 
     <int:channel id="dataOutChannel"/>
 
     <int:object-to-json-transformer input-channel="dataOutObject" output-channel="dataOutChannel"/>
 
-    <int-file:outbound-channel-adapter id="filesOut" channel="dataOutChannel" directory="dataOut"/>
+    <int-file:outbound-channel-adapter id="filesOut"
+                                       channel="dataOutChannel"
+                                       directory="dataOut"
+                                       delete-source-files="true"/>
 
     <!--    <int:channel id="aggregateAuthor"/>-->
+
+    <!--    <int:channel id="outputChannel"/>-->
 
     <!--    <int:aggregator id="myAggregator"-->
     <!--                    input-channel="aggregateAuthor"-->
@@ -57,8 +62,5 @@
     <!--                    correlation-strategy-expression="payload.author">-->
     <!--    </int:aggregator>-->
 
-    <!--    <int:channel id="outputChannel"></int:channel>-->
     <!--    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>-->
-
-
 </beans>

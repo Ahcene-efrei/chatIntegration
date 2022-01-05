@@ -15,7 +15,7 @@ public class Message {
 
     @Override
     public String toString() {
-        return "ESAIAAAAAAAAAAAAAAAAAAAAAAAAAAS { author='" + author + "', content='" + content + "', date='" + date + "'}";
+        return "{ author='" + author + "', content='" + content + "', date='" + date + "'}";
     }
 
     public void setAuthor(String author) {
