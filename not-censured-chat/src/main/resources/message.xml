@@ -6,9 +6,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/integration
-           http://www.springframework.org/schema/integration/spring-integration-5.1.xsd
+           http://www.springframework.org/schema/integration/spring-integration-5.2.xsd
            http://www.springframework.org/schema/integration/file
-           http://www.springframework.org/schema/integration/file/spring-integration-file-5.1.xsd">
+           http://www.springframework.org/schema/integration/file/spring-integration-file-5.2.xsd">
 
     <int:channel id="dataInChannel"/>
 
@@ -50,7 +50,9 @@
     <int-file:outbound-channel-adapter id="filesOut"
                                        channel="dataOutChannel"
                                        directory="dataOut"
-                                       delete-source-files="true"/>
+                                       delete-source-files="true"
+                                       append-new-line="true"
+                                       filename-generator-expression="'message.json'"/>
 
     <!--    <int:channel id="aggregateAuthor"/>-->
 
