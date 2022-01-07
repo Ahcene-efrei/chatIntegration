@@ -15,7 +15,7 @@
     <int-file:inbound-channel-adapter
             channel="dataInChannel"
             directory="dataIn"
-            filename-pattern="message.json">
+            filename-pattern="*.json">
         <int:poller id="poller" fixed-delay="1000"/>
     </int-file:inbound-channel-adapter>
 
@@ -50,9 +50,7 @@
     <int-file:outbound-channel-adapter id="filesOut"
                                        channel="dataOutChannel"
                                        directory="dataOut"
-                                       delete-source-files="true"
-                                       append-new-line="true"
-                                       filename-generator-expression="'message.json'"/>
+                                       delete-source-files="true"/>
 
     <!--    <int:channel id="aggregateAuthor"/>-->
 
