@@ -15,8 +15,9 @@
     <int-file:inbound-channel-adapter
             channel="dataInChannel"
             directory="dataIn"
-            filename-pattern="*.json">
-        <int:poller id="poller" fixed-delay="1000"/>
+            filename-pattern="*.json"
+    >
+        <int:poller id="poller" fixed-delay="1000" />
     </int-file:inbound-channel-adapter>
 
     <int:channel id="dataInObject"/>
@@ -25,11 +26,11 @@
                                     output-channel="dataInObject"
                                     type="fr.efrei.notcensuredchat.Message"/>
 
-<!--    <int:logging-channel-adapter channel="dataInObject"/>-->
+
 
     <int:recipient-list-router input-channel="dataInObject">
         <int:recipient channel="censureChannel"/>
-<!--        <int:recipient channel="aggregateAuthor"/>-->
+        <int:recipient channel="logger"/>
     </int:recipient-list-router>
 
     <bean id="censureService" class="fr.efrei.notcensuredchat.CensureService"/>
@@ -52,15 +53,55 @@
                                        directory="dataOut"
                                        delete-source-files="true"/>
 
-    <!--    <int:channel id="aggregateAuthor"/>-->
+    <int:channel id="logMessage"/>
+    <int:channel id="loggerOutChannel"/>
+    <int:service-activator input-channel="logger" output-channel="logMessage" ref="logServiceID" method="convertToLog"/>
+    <bean id="logServiceID" class="fr.efrei.notcensuredchat.LogService"/>
 
-    <!--    <int:channel id="outputChannel"/>-->
+    <int:recipient-list-router input-channel="logMessage">
+        <int:recipient channel="globalLog"/>
+        <int:recipient channel="personalLog"/>
+    </int:recipient-list-router>
 
-    <!--    <int:aggregator id="myAggregator"-->
-    <!--                    input-channel="aggregateAuthor"-->
-    <!--                    output-channel="outputChannel"-->
-    <!--                    correlation-strategy-expression="payload.author">-->
-    <!--    </int:aggregator>-->
+    <int:object-to-string-transformer input-channel="globalLog" output-channel="loggerOutChannel"/>
+    <int-file:outbound-channel-adapter id="globalFileLogsOut"
+                                       mode="APPEND"
+                                       channel="loggerOutChannel"
+                                       directory="logs"
+                                       append-new-line="true"
+                                       filename-generator-expression="'global_logs.txt'"/>
 
-    <!--    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>-->
+
+
+    <int:channel id="personalLogWithHeader"/>
+    <int:channel id="personalLoggerOutChannel"/>
+
+    <int:header-enricher input-channel="personalLog" output-channel="personalLogWithHeader">
+        <int:header name="author" expression="payload.author"/>
+    </int:header-enricher>
+
+    <int:object-to-string-transformer input-channel="personalLogWithHeader" output-channel="personalLoggerOutChannel"/>
+    <int-file:outbound-channel-adapter id="personalFileLogsOut"
+                                       mode="APPEND"
+                                       channel="personalLoggerOutChannel"
+                                       directory="logs"
+                                       append-new-line="true"
+                                       filename-generator-expression="headers.author+'.txt'"/>
+    <!--    <int:channel id="aggregateAuthor"/>
+
+    <int:channel id="outputChannel"/>
+    S=
+    <int:aggregator id="myAggregator"
+        input-channel="aggregateAuthor"
+        output-channel="outputChannel"
+        correlation-strategy-expression="payload.author">
+    </int:aggregator>
+
+    <int-file:outbound-channel-adapter id="filesOut"
+       mode="APPEND"
+       channel="outputChannel"
+       directory="dataOut"
+       filename-generator-expression="'log.json'"
+       delete-source-files="true"/>
+    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>-->
 </beans>
