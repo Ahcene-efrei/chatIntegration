@@ -29,9 +29,50 @@
 
 
     <int:recipient-list-router input-channel="dataInObject">
+        <int:recipient channel="uncensoredLogger"/>
         <int:recipient channel="censureChannel"/>
         <int:recipient channel="logger"/>
+        <int:recipient channel="aggregatorCensoredContent"/>
     </int:recipient-list-router>
+
+
+    <int:channel id="uncensoredLogMessage"/>
+    <int:channel id="uncensoredLoggerOutChannel"/>
+    <int:service-activator input-channel="uncensoredLogger" output-channel="uncensoredLogMessage" ref="uncensoredLogServiceID" method="convertToLog"/>
+    <bean id="uncensoredLogServiceID" class="fr.efrei.notcensuredchat.LogService"/>
+
+    <int:recipient-list-router input-channel="uncensoredLogMessage">
+        <int:recipient channel="globalUncensoredLog"/>
+        <int:recipient channel="personalUncensoredLog"/>
+    </int:recipient-list-router>
+
+    <int:object-to-string-transformer input-channel="globalUncensoredLog" output-channel="uncensoredLoggerOutChannel"/>
+    <int-file:outbound-channel-adapter id="globalUncensoredFileLogsOut"
+                                       mode="APPEND"
+                                       channel="uncensoredLoggerOutChannel"
+                                       directory="logs"
+                                       append-new-line="true"
+                                       filename-generator-expression="'global_logs.txt'"/>
+
+
+
+    <int:channel id="personalUncensoredLogWithHeader"/>
+    <int:channel id="personalUncensoredLoggerOutChannel"/>
+
+    <int:header-enricher input-channel="personalUncensoredLog" output-channel="personalUncensoredLogWithHeader">
+        <int:header name="author" expression="payload.author"/>
+    </int:header-enricher>
+
+    <int:object-to-string-transformer input-channel="personalUncensoredLogWithHeader" output-channel="personalUncensoredLoggerOutChannel"/>
+    <int-file:outbound-channel-adapter id="personalFileUncensoredLogsOut"
+                                       mode="APPEND"
+                                       channel="personalUncensoredLoggerOutChannel"
+                                       directory="logs"
+                                       append-new-line="true"
+                                       filename-generator-expression="headers.author+'.txt'"/>
+
+
+
 
     <bean id="censureService" class="fr.efrei.notcensuredchat.CensureService"/>
 
@@ -53,6 +94,7 @@
                                        directory="dataOut"
                                        delete-source-files="true"/>
 
+
     <int:channel id="logMessage"/>
     <int:channel id="loggerOutChannel"/>
     <int:service-activator input-channel="logger" output-channel="logMessage" ref="logServiceID" method="convertToLog"/>
@@ -67,7 +109,7 @@
     <int-file:outbound-channel-adapter id="globalFileLogsOut"
                                        mode="APPEND"
                                        channel="loggerOutChannel"
-                                       directory="logs"
+                                       directory="logs_censored"
                                        append-new-line="true"
                                        filename-generator-expression="'global_logs.txt'"/>
 
@@ -84,24 +126,33 @@
     <int-file:outbound-channel-adapter id="personalFileLogsOut"
                                        mode="APPEND"
                                        channel="personalLoggerOutChannel"
-                                       directory="logs"
+                                       directory="logs_censored"
                                        append-new-line="true"
                                        filename-generator-expression="headers.author+'.txt'"/>
-    <!--    <int:channel id="aggregateAuthor"/>
 
-    <int:channel id="outputChannel"/>
-    S=
-    <int:aggregator id="myAggregator"
-        input-channel="aggregateAuthor"
-        output-channel="outputChannel"
-        correlation-strategy-expression="payload.author">
-    </int:aggregator>
 
-    <int-file:outbound-channel-adapter id="filesOut"
-       mode="APPEND"
-       channel="outputChannel"
-       directory="dataOut"
-       filename-generator-expression="'log.json'"
-       delete-source-files="true"/>
-    <int-file:outbound-channel-adapter channel="outputChannel" id="filesOut" directory="dataOut"/>-->
+    <int:channel id="aggregatorCensoredContent"/>
+
+    <int:channel id="messageWithBadWord"/>
+
+    <int:header-enricher input-channel="aggregatorCensoredContent" output-channel="aggregatorCensoredContentOut">
+        <int:header name="containBadWord" expression="payload.containBadWord"/>
+    </int:header-enricher>
+
+    <int:filter input-channel="aggregatorCensoredContentOut"
+                expression="payload.containBadWord == true"
+                output-channel="messageFiltered"/>
+
+
+    <int:service-activator input-channel="messageFiltered" output-channel="messageWithBadWord" ref="badWordsServiceID" method="toCensoredContent"/>
+    <bean id="badWordsServiceID" class="fr.efrei.notcensuredchat.CensoredContentService"/>
+
+    <int:channel id="messageWithBadWordOut"/>
+    <int:object-to-string-transformer input-channel="messageWithBadWord" output-channel="messageWithBadWordOut"/>
+    <int-file:outbound-channel-adapter id="BadGuysListOut"
+                                       mode="APPEND"
+                                       channel="messageWithBadWordOut"
+                                       directory="BadUser"
+                                       append-new-line="true"
+                                       filename-generator-expression="'BadUsers.txt'"/>
 </beans>
