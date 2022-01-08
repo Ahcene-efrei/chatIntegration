@@ -19,7 +19,7 @@ public class CensoredContent {
             String buffer = "(";
             buffer +=String.join(", ", badWords);
             buffer +=")";
-            return "["+this.author+"] : " + buffer;
+            return this.date + " - ["+this.author+"] : " + buffer;
         }
 
         return "CensoredContent{" +

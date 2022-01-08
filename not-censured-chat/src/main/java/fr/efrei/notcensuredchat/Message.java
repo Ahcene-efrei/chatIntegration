@@ -1,9 +1,6 @@
 package fr.efrei.notcensuredchat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,10 +9,22 @@ public class Message {
     private String author;
     private String content;
     private Date date;
+    private Boolean containBadWord = false;
+    private ArrayList<String> foundBadWords = new ArrayList<>();
+
+
 
     @Override
     public String toString() {
-        return "{ author='" + author + "', content='" + content + "', date='" + date + "'}";
+        return " author='" + author + "', content='" + content + "', date='" + date + "'}";
+    }
+
+    public Boolean getContainBadWord() {
+        return containBadWord;
+    }
+
+    public ArrayList<String> getFoundBadWords() {
+        return foundBadWords;
     }
 
     public void setAuthor(String author) {
@@ -54,7 +63,7 @@ public class Message {
                 break;
             }
         }
-
+        this.containBadWord = found;
         if (!found) return;
 
         StringBuilder censuredContent = new StringBuilder();
@@ -64,6 +73,7 @@ public class Message {
                 censuredContent.append(" ");
 
                 if (word.contains(badWord)) {
+                    this.foundBadWords.add(word);
                     censuredContent.append("*".repeat(word.length()));
                 } else {
                     censuredContent.append(word);
